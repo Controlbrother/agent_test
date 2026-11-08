@@ -121,6 +121,124 @@ vi compress(vi a) {              // 返回每个元素的名次（从 0 开始�
 }
 ```
 
+## 二分法
+
+### 1. 整数二分：只用这一个函数，不要背四种
+```cpp
+// 在 [lo, hi) 里找第一个满足 pred(x) 为 true 的位置。
+// pred 必须在区间内单调（false...false true...true），否则结果无意义。
+// 找不到时返回 hi —— 调用方自己判断 lo <= res < hi。
+template <class F>
+ll lowerBoundLL(ll lo, ll hi, F pred) {
+    while (lo < hi) {
+        ll mid = lo + (hi - lo) / 2;   // 不写 (lo+hi)/2：防 lo+hi 溢出
+        if (pred(mid))
+            hi = mid;
+        else
+            lo = mid + 1;
+    }
+    return lo;
+}
+```
+**四种经典写法都能用它表达**（`a` 升序）：
+
+| 需求 | 写法 |
+|---|---|
+| 第一个 `>= x` | `lowerBoundLL(0, n, [&](ll i){ return a[i] >= x; })` |
+| 第一个 `> x` | `lowerBoundLL(0, n, [&](ll i){ return a[i] > x; })` |
+| 最后一个 `<= x` | `lowerBoundLL(0, n, [&](ll i){ return a[i] > x; }) - 1` |
+| 最后一个 `< x` | `lowerBoundLL(0, n, [&](ll i){ return a[i] >= x; }) - 1` |
+
+不要写 `while (lo <= hi)` 那种版本：`mid ± 1` 漏一处就是死循环，而这个版本区间收缩永远严格。
+
+### 2. STL：能用就直接用
+```cpp
+// 升序 a：返回迭代器，都 O(log n)
+auto it1 = lower_bound(all(a), x);        // 第一个 >= x
+auto it2 = upper_bound(all(a), x);        // 第一个 > x
+bool has = binary_search(all(a), x);      // 存在性
+// 下标版：int pos = int(it - a.begin());  pos == sz(a) 表示没找到
+
+// 降序数组（greater<int>）要传比较器，方向反过来：
+auto it3 = lower_bound(a.begin(), a.end(), x, greater<int>()); // 第一个 <= x
+```
+
+**易错**：对 `vector<ll>` 查找时 `x` 也用 `ll`，别传 `int` 字面量给 `lower_bound` 的模板推导添乱；`lower_bound` 要求区间**有序**，且比较器与排序时用的必须一致。
+
+### 3. 二分答案（"最小的最大值 / 最大的最小值"）
+```cpp
+// 求最小的 t 使 check(t) 成立；check 必须满足：t 不成立 => 更小的 t 也不成立
+ll binarySearchAnswer(ll lo, ll hi, F check) {   // 答案闭区间 [lo, hi]
+    ll l = lo, r = hi;
+    while (l < r) {
+        ll mid = l + (r - l) / 2;
+        if (check(mid))
+            r = mid;      // mid 可行 -> 答案在 [l, mid]
+        else
+            l = mid + 1;  // mid 不可行 -> 答案在 [mid+1, r]
+    }
+    return l;
+}
+```
+判 `check` 时的典型错误：**把"答案可行"和"答案更大/更小"搞反**。记住口诀——`r = mid` 对应"存在更小的可行解"，`l = mid + 1` 对应"mid 不满足"。
+
+### 4. 实数二分（精度版，比固定 100 次迭代更可控）
+```cpp
+// 求 f(x) = 0 的根 / 极值，单调区间 [lo, hi]
+double binarySearchReal(double lo, double hi, F pred, int iterations = 200) {
+    for (int i = 0; i < iterations; ++i) {
+        double mid = (lo + hi) / 2;
+        if (pred(mid))
+            hi = mid;
+        else
+            lo = mid;
+    }
+    return (lo + hi) / 2;
+}
+```
+固定迭代 200 次一定收敛（区间每次减半，double 只有 53 位有效位），比 `while (hi - lo > 1e-9)` 更稳——后者在 `hi`、`lo` 很大时可能永远达不到。
+
+### 5. 三分求单峰极值（凸/凹函数）
+```cpp
+// 求 [lo, hi] 上单峰函数 f 的最小值（f 先减后增）；求最大就把比较反一下
+double ternarySearch(double lo, double hi) {
+    for (int i = 0; i < 200; ++i) {
+        double m1 = lo + (hi - lo) / 3;
+        double m2 = hi - (hi - lo) / 3;
+        if (f(m1) < f(m2))
+            hi = m2;   // 极小值在 [lo, m2]
+        else
+            lo = m1;
+    }
+    return f((lo + hi) / 2);
+}
+```
+
+### 6. 两类"非数组"二分，容易忘
+```cpp
+// (a) 二分答案的范围常常不是数组下标，而是数值域：
+//     如"最少要多少天"、"最大载重" -> lo=下界, hi=上界, 判 check(mid)
+
+// (b) 旋转数组找最小值（无重复元素）：
+int findMin(vector<int>& a) {
+    int lo = 0, hi = sz(a) - 1;
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (a[mid] > a[hi]) lo = mid + 1;   // 最小值在右半
+        else hi = mid;                       // 最小值在左半（含 mid）
+    }
+    return a[lo];
+}
+```
+
+### 7. 边界自查清单（写完必过一遍）
+- `lo`、`hi` 是**闭区间**还是**半开区间**？全程统一，别混。
+- `hi` 初值取 `n` 还是 `n - 1`？半开写法取 `n`（`a[n]` 不访问，只是哨兵位）。
+- 返回 `lo` 后，`lo == hi` 表示**没找到**——调用方有没有判？
+- `mid` 用 `lo + (hi - lo) / 2`，不用 `(lo + hi) / 2`（`lo+hi` 溢出是经典 WA）。
+- 答案可能是负数时，`lo` 初值别写成 `0`。
+- `check(mid)` 里的 `mid` 会不会越界访问数组？
+
 ## 组合数预处理（模素数）
 ```cpp
 vector<ll> fact, inv_fact;
