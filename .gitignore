@@ -1,0 +1,15 @@
+# 编译产物
+main
+*.o
+*.out
+a.out
+# 本地测试数据（保留 sample_*，忽略自定义）
+in.txt
+out.txt
+*.in
+*.ans
+!template/sample_in.txt
+!template/sample_out.txt
+# editor
+.vscode/
+.idea/
