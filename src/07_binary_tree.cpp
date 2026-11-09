@@ -31,6 +31,7 @@
 #include <iostream>
 #include <queue>
 #include <stack>
+#include <unordered_map>
 #include <vector>
 
 using std::cout;
@@ -280,25 +281,28 @@ TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
 //   位置左边是左子树的中序，右边是右子树的中序，
 //   据此也能切出对应的前序区间，然后递归构造。
 //
-// 为了不用每次线性查找根的位置，先建一个"值 -> 中序下标"的哈希表。
+// 为了不用每次线性查找根的位置，先建一个"值 -> 中序下标"的哈希表
+// （unordered_map）。这里特意**不用数组**做映射：节点值可能是负数，
+// 也可能非常大（LeetCode 105 的范围是 -3000..3000），
+// 用"值当下标"会越界或申请出巨大的数组。
 //
 // 时间复杂度 O(n)，空间复杂度 O(n)。
 //
 // 易错点：
 //   - 区间边界用"左闭右闭"，长度计算别少 1；
-//   - 左右子树的区间长度必须一致，切错了就会越界。
+//   - 左右子树的区间长度必须一致，切错了就会越界；
+//   - 值 -> 位置要用哈希表，不能用"值当下标"的数组。
 // ------------------------------------------------------------
-TreeNode* buildFromPreorderInorder(const vector<int>& preorder,
-                                   const vector<int>& inorder,
-                                   const vector<int>& position,
-                                   int preLeft, int preRight,
-                                   int inLeft, int inRight) {
+TreeNode* buildFromPreorderInorder(
+    const vector<int>& preorder, const vector<int>& inorder,
+    const std::unordered_map<int, int>& position, int preLeft, int preRight,
+    int inLeft, int inRight) {
     if (preLeft > preRight) return nullptr;
 
     int rootValue = preorder[preLeft];
     TreeNode* root = new TreeNode(rootValue);
 
-    int rootPosition = position[rootValue];      // 根在中序里的位置
+    int rootPosition = position.at(rootValue);   // 根在中序里的位置
     int leftSize = rootPosition - inLeft;        // 左子树的节点个数
 
     root->left = buildFromPreorderInorder(preorder, inorder, position,
@@ -315,10 +319,8 @@ TreeNode* buildTreeFromPreorderInorder(const vector<int>& preorder,
     if (preorder.empty()) return nullptr;
 
     // position[值] = 该值在中序数组里的下标（题目保证值不重复）
-    int maxValue = 0;
-    for (int value : preorder) maxValue = std::max(maxValue, value);
-    for (int value : inorder) maxValue = std::max(maxValue, value);
-    vector<int> position(maxValue + 1, -1);
+    // 用哈希表而不是数组：值可能是负数，也可能很大
+    std::unordered_map<int, int> position;
     for (int i = 0; i < (int)inorder.size(); ++i) {
         position[inorder[i]] = i;
     }
@@ -403,7 +405,7 @@ int main() {
     cout << "最近公共祖先：5 和 1 的 LCA = " << lcaTree->value
          << "，5 和 2 的 LCA = " << node5->value << endl;
 
-    // 示例 7：从前序 + 中序建树
+    // 示例 7：从前序 + 中序建树（节点值可以是负数）
     vector<int> preorderInput = {3, 9, 20, 15, 7};
     vector<int> inorderInput = {9, 3, 15, 20, 7};
     TreeNode* rebuilt = buildTreeFromPreorderInorder(preorderInput, inorderInput);
@@ -417,11 +419,22 @@ int main() {
     assert(rebuiltIn == inorderInput);
     cout << "前序 + 中序建树：重建后的遍历结果与原输入一致" << endl;
 
+    // 含负数节点值也要能建树（值 -> 位置必须用哈希表，不能用数组下标）
+    vector<int> negativePreorder = {0, -5, -10, 3, -2};
+    vector<int> negativeInorder = {-10, -5, 0, 3, -2};
+    TreeNode* negativeTree =
+        buildTreeFromPreorderInorder(negativePreorder, negativeInorder);
+    vector<int> negativeRebuiltPre;
+    preorder(negativeTree, negativeRebuiltPre);
+    assert(negativeRebuiltPre == negativePreorder);
+    cout << "前序 + 中序建树：负数节点值也能正常处理" << endl;
+
     // 释放内存
     freeTree(root);
     freeTree(bst);
     freeTree(lcaTree);
     freeTree(rebuilt);
+    freeTree(negativeTree);
 
     // 边界：空树
     assert(maxDepth(nullptr) == 0);

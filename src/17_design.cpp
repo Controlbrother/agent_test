@@ -1,8 +1,10 @@
 // ============================================================
 // 专题 17：设计题（LRU 缓存 / Trie 前缀树 / O(1) 随机集合）
 //
-// 适用题型：LRU 缓存、LFU 缓存、实现 Trie、常数时间插入删除随机取、
-//           最小栈（见 06_stack_queue.cpp）。
+// 本节实现：LRU 缓存、Trie 前缀树、O(1) 随机集合。
+//
+// 同思路可解：LFU 缓存（哈希 + 频率桶，是 LRU 的进阶版，本节未实现）、
+//           最小栈（辅助栈，代码在 06_stack_queue.cpp）。
 //
 // 核心思想：
 //   设计题考的是"把两种数据结构组合起来"，套路非常固定：
@@ -166,7 +168,11 @@ public:
     Trie(const Trie&) = delete;
     Trie& operator=(const Trie&) = delete;
 
+    // 约定：只接受小写字母 a~z。遇到其它字符直接跳过该单词，
+    // 这样 insert 和 search / startsWith 的行为保持一致（都不会越界）。
     void insert(const string& word) {
+        if (!isLowercaseWord(word)) return;  // 非法字符：不插入
+
         TrieNode* current = root_;
         for (char c : word) {
             int index = c - 'a';
@@ -197,8 +203,18 @@ private:
         }
     };
 
+    // 检查是不是只由小写字母组成（防止用字符当数组下标时越界）
+    static bool isLowercaseWord(const string& text) {
+        for (char c : text) {
+            if (c < 'a' || c > 'z') return false;
+        }
+        return true;
+    }
+
     // 沿着字符串走，走不通返回 nullptr
     const TrieNode* findNode(const string& text) const {
+        if (!isLowercaseWord(text)) return nullptr;
+
         const TrieNode* current = root_;
         for (char c : text) {
             int index = c - 'a';
@@ -301,6 +317,14 @@ int main() {
     assert(trie.search("banana") == false);
     cout << "Trie：插入 apple 后 search(app)=false、startsWith(app)=true；"
             "再插入 app 后 search(app)=true" << endl;
+
+    // 边界：非小写字母不能越界（用字符当数组下标时必须先校验）
+    Trie unicodeTrie;
+    unicodeTrie.insert("A");       // 大写：直接忽略，不崩溃
+    unicodeTrie.insert("你好");     // 中文：同理
+    assert(unicodeTrie.search("A") == false);
+    assert(unicodeTrie.search("你好") == false);
+    cout << "Trie：插入大写 / 中文不会越界，search 返回 false" << endl;
 
     // 示例 3：O(1) 随机集合
     std::srand(12345);  // 固定随机种子，保证每次运行结果一致

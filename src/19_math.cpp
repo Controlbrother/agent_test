@@ -1,8 +1,10 @@
 // ============================================================
 // 专题 19：数学基础（快速幂 / 最大公约数 / 组合数 / 质数筛）
 //
-// 适用题型：快速幂、求 gcd / lcm、组合数 C(n, k) 取模、
-//           判断质数、筛法求质数、约数个数。
+// 本节实现：快速幂、gcd / lcm、组合数 C(n, k) 取模、质数筛、试除法判质数。
+//
+// 同思路可解：约数个数（用质数筛出的质因子试除）、
+//           扩展欧几里得求逆元（本节用费马小定理算逆元，前提是模数为质数）。
 //
 // 核心思想：
 //   这些是"当工具用"的数学函数，面试时经常作为大题的一小部分出现。
@@ -60,7 +62,7 @@ long long fastPower(long long base, long long exponent, long long mod = MOD) {
 // 2. 最大公约数（辗转相除 / 欧几里得算法）
 //
 // 思路：gcd(a, b) = gcd(b, a % b)，直到 b == 0，此时 a 就是答案。
-// 最小公倍数 = a / gcd(a, b) * b（先除后乘，防止溢出）。
+// 最小公倍数 = |a| / gcd(|a|, |b|) * |b|（先除后乘，防止溢出；先取绝对值保证结果非负）。
 //
 // 时间复杂度 O(log min(a, b))，空间复杂度 O(1)。
 // ------------------------------------------------------------
@@ -73,9 +75,14 @@ long long greatestCommonDivisor(long long a, long long b) {
     return a < 0 ? -a : a;
 }
 
+// 最小公倍数：先取绝对值再算，保证结果非负
+// （数学上 lcm 定义为非负；a / gcd * b 这个公式用来防溢出。
+//   直接对 a、b 用公式时如果一正一负会得到负数，所以先取绝对值。）
 long long leastCommonMultiple(long long a, long long b) {
-    if (a == 0 || b == 0) return 0;
-    return a / greatestCommonDivisor(a, b) * b;
+    long long positiveA = a < 0 ? -a : a;
+    long long positiveB = b < 0 ? -b : b;
+    if (positiveA == 0 || positiveB == 0) return 0;
+    return positiveA / greatestCommonDivisor(positiveA, positiveB) * positiveB;
 }
 
 // ------------------------------------------------------------
@@ -171,8 +178,10 @@ int main() {
     assert(fastPower(2, 10) == 1024);
     assert(fastPower(3, 13) == 1594323);      // 3^13 = 1594323
     assert(fastPower(5, 0) == 1);             // 任何数的 0 次方是 1
-    assert(fastPower(7, 123456789) == fastPower(7, 123456789));
     assert(fastPower(2, 10, 1) == 0);         // mod 为 1 时结果为 0
+    // 2^100 mod 1e9+7 的期望值由 Python 独立算出：
+    //   pow(2, 100, 1000000007) == 976371285
+    assert(fastPower(2, 100) == 976371285);
 
     // 示例 2：gcd / lcm
     cout << "gcd(12, 18) = " << greatestCommonDivisor(12, 18)
@@ -180,6 +189,7 @@ int main() {
     assert(greatestCommonDivisor(12, 18) == 6);
     assert(greatestCommonDivisor(-12, 18) == 6);  // 负数也能算
     assert(leastCommonMultiple(4, 6) == 12);
+    assert(leastCommonMultiple(-4, 6) == 12);      // 负数结果也非负
     assert(leastCommonMultiple(0, 5) == 0);
 
     // 示例 3：组合数
@@ -189,9 +199,12 @@ int main() {
     assert(combination.choose(5, 2) == 10);   // 5 选 2 = 10
     assert(combination.choose(5, 0) == 1);
     assert(combination.choose(5, 6) == 0);    // k > n 时是 0
+    // C(100, 50) mod 1e9+7 的期望值由 Python 独立算出：
+    //   math.comb(100, 50) % 1000000007 == 538992043
+    assert(combination.choose(100, 50) == 538992043);
     // 对称性：C(n, k) == C(n, n-k)
-    assert(combination.choose(100, 50) == combination.choose(100, 50));
     assert(combination.choose(20, 3) == combination.choose(20, 17));
+    assert(combination.choose(20, 3) == 1140);   // 20*19*18/6
 
     // 示例 4：质数筛
     vector<int> primes = sieveOfEratosthenes(30);

@@ -8,7 +8,10 @@
   `<algorithm>`；不用 `bits/stdc++.h`、不用 `#define` 宏、不用模板元编程。
 - **中文注释齐全**：每个文件头部写清「这个算法是什么 / 思路 / 时间复杂度 /
   空间复杂度 / 常见易错点」，函数体和关键行也有注释，并且注释与代码一致。
-- **每个文件都能单独编译运行**：自带 `main()`、示例输入输出和 `assert` 自检。
+- **每个文件都能单独编译运行**：都带 `main()` 和示例；其中 19 个专题文件在示例里用
+  `assert` 自检并打印「XX 全部示例通过」，`00_basics.cpp` 是例外——它演示的是
+  "从标准输入读数据"，所以配合 `tests/samples/00_basics.in` 跑，输出和
+  `tests/expected/00_basics.out` 比对（不打印那句话）。
 
 ## 目录结构
 
@@ -36,12 +39,14 @@
 │   ├── 17_design.cpp               设计题（LRU / Trie / O(1) 随机集合）
 │   ├── 18_advanced_structures.cpp  树状数组 / 线段树 / 离散化
 │   └── 19_math.cpp                 数学基础（快速幂 / gcd / 组合数 / 质数筛）
+├── scripts/
+│   ├── build_all.sh                ← 一键编译（零 warning）并运行全部文件
+│   └── md_to_html.py               把知识库 md 渲染成 HTML，供 Chrome 导出 PDF
+│                                   （需要 pip install markdown，只在改知识库时才用）
 ├── tests/                          ← 样例输入输出 + 测试脚本
 │   ├── samples/00_basics.in        样例输入（只有"从 stdin 读数据"的程序需要）
 │   ├── expected/00_basics.out      对应的期望输出
 │   └── run_tests.sh                编译（-Werror）+ 运行 + 对比输出
-├── scripts/
-│   └── build_all.sh                一键编译并运行全部练习代码
 ├── docs/
 │   ├── cpp-interview-guide.md      知识库：按类别的原理 / 模板 / 必刷题 / 易错点
 │   └── cpp-interview-guide.pdf     上面这份文档的 PDF 版本
@@ -169,4 +174,5 @@ int main() {
 - 所有代码统一 `-std=c++17`，不依赖第三方库。
 - 变量名用完整单词（`prefixSum` 而不是 `pre`，`currentDistance` 而不是 `d`）。
 - 注释写"为什么"和"这一步在干什么"，不写废话。
-- 每个文件末尾打印 `XX 全部示例通过`，方便测试脚本判断。
+- 除 `src/00_basics.cpp`（从标准输入读数据）外，每个文件末尾打印
+  `XX 全部示例通过`，方便测试脚本判断。

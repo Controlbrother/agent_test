@@ -1,8 +1,12 @@
 // ============================================================
 // 专题 02：滑动窗口
 //
-// 适用题型：最长无重复字符子串、最小覆盖子串、长度最小的子数组、
-//           定长窗口最大值、字符串的排列。
+// 本节实现：最长无重复字符子串（最长型）、长度最小的子数组（最短型）、
+//           最小覆盖子串（最短型 + 计数）。
+//
+// 同思路可解：字符串的排列（定长窗口 + 计数）、找所有字母异位词。
+// 另外注意：定长窗口最大值的最优解是"单调队列"（不是滑动窗口计数），
+//           见 06_stack_queue.cpp 里的 maxSlidingWindow。
 //
 // 核心思想：
 //   维护一个窗口 [left, right]，right 负责向右扩张，left 负责收缩，
@@ -52,17 +56,19 @@ using std::vector;
 // 时间复杂度 O(n)，空间复杂度 O(字符集大小)。
 // ------------------------------------------------------------
 int lengthOfLongestSubstring(const string& text) {
-    vector<int> count(128, 0);  // ASCII 字符的出现次数
+    // 用 256 大小的计数数组，下标统一转成 unsigned char：
+    // char 在某些平台上是有符号的，直接用负的 char 当下标会越界。
+    vector<int> count(256, 0);
     int left = 0;
     int best = 0;
 
     for (int right = 0; right < (int)text.size(); ++right) {
-        char current = text[right];
+        unsigned char current = (unsigned char)text[right];
         ++count[current];
 
         // 窗口不合法：有字符出现了两次，收缩左边界
         while (count[current] > 1) {
-            --count[text[left]];
+            --count[(unsigned char)text[left]];
             ++left;
         }
 

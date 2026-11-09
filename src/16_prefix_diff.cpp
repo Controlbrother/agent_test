@@ -1,10 +1,14 @@
 // ============================================================
 // 专题 16：前缀和 / 差分
 //
-// 适用题型：
-//   前缀和：区间求和（LeetCode 303）、二维区域和（304）、
-//           和为 K 的子数组（560）、除自身以外数组的乘积（238）；
-//   差分：  区间批量加（LeetCode 1109 航班预订统计）、二维差分。
+// 本节实现：
+//   前缀和：一维区间求和、二维区域求和；
+//   差分：  一维区间加 + 还原、航班预订统计（1109）。
+//
+// 同思路可解：
+//   和为 K 的子数组（前缀和 + 哈希，代码在 04_hash_table.cpp）；
+//   除自身以外数组的乘积（前/后缀积，把"和"换成"积"即可）；
+//   二维差分（把一维的"两端标记"扩展到矩形的四个角，本节未实现）。
 //
 // 核心思想：
 //   - 前缀和：把"区间求和"从 O(n) 降到 O(1)，
@@ -104,6 +108,7 @@ long long rangeSum2D(const vector<vector<long long>>& prefix,
 vector<long long> buildDifferenceArray(const vector<int>& numbers) {
     int n = (int)numbers.size();
     vector<long long> diff(n + 1, 0);  // 多开一位给 right + 1
+    if (n == 0) return diff;           // 空数组：直接返回全 0 的差分数组
 
     diff[0] = numbers[0];
     for (int i = 1; i < n; ++i) {
@@ -213,6 +218,15 @@ int main() {
     assert(buildPrefixSum({}).size() == 1);          // 只有 pre[0] = 0
     assert(rangeSum(buildPrefixSum({}), 0, -1) == 0);  // 空区间
     assert(buildPrefixSum2D({}).empty());
+
+    // 差分：空数组要返回"长度为 1、内容全 0"的差分数组，不能越界访问
+    vector<long long> emptyDiff = buildDifferenceArray({});
+    assert(emptyDiff.size() == 1 && emptyDiff[0] == 0);
+    assert(restoreFromDifference(emptyDiff, 0).empty());
+
+    // 差分：单元素
+    vector<long long> singleDiff = buildDifferenceArray({42});
+    assert((restoreFromDifference(singleDiff, 1) == vector<long long>{42}));
 
     cout << "16 前缀和与差分：全部示例通过" << endl;
     return 0;

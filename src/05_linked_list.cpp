@@ -1,8 +1,11 @@
 // ============================================================
 // 专题 05：链表
 //
-// 适用题型：反转链表、合并有序链表、删除倒数第 N 个节点、
-//           环形链表（判断有没有环、找入环点）、找中点、重排链表。
+// 本节实现：反转链表、合并两个有序链表、删除倒数第 N 个节点、
+//           环形链表找入环点、找中点。
+//
+// 同思路可解：重排链表（找中点 + 反转 + 合并，正好是本节的三个函数拼起来）、
+//           反转链表 II（局部反转）、合并 K 个有序链表（用堆，见 10_heap.cpp）。
 //
 // 核心思想：
 //   链表题的套路只有三个，几乎所有题都是它们的组合：
@@ -144,8 +147,13 @@ ListNode* mergeTwoLists(ListNode* first, ListNode* second) {
 //
 // 时间复杂度 O(n)，空间复杂度 O(1)。
 // 用哑节点处理"删除头节点"的情况。
+//
+// 边界：题目保证 1 <= n <= 链表长度；这里加一个防御性检查，
+//   传入非法 n 时原样返回，不会解引用空指针。
 // ------------------------------------------------------------
 ListNode* removeNthFromEnd(ListNode* head, int n) {
+    if (n <= 0) return head;
+
     ListNode dummy(0);
     dummy.next = head;
 
@@ -153,7 +161,8 @@ ListNode* removeNthFromEnd(ListNode* head, int n) {
     ListNode* slow = &dummy;
 
     for (int i = 0; i <= n; ++i) {
-        fast = fast->next;  // fast 先走 n + 1 步
+        if (fast == nullptr) return head;  // n 超过链表长度，直接不删
+        fast = fast->next;                 // fast 先走 n + 1 步
     }
     while (fast != nullptr) {
         fast = fast->next;
@@ -246,6 +255,9 @@ int main() {
     cout << "删除倒数第 2 个后：";
     printList(list2);
     assert(list2->next->next->next->value == 5);
+    // 边界：n 非法时原样返回，不崩溃
+    assert(removeNthFromEnd(list2, 0) == list2);
+    assert(removeNthFromEnd(list2, 99) == list2);
     freeList(list2);
 
     // 示例 4：环形链表找入环点

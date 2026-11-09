@@ -122,6 +122,10 @@ bool canJump(const vector<int>& jumps) {
 //   走到 currentEnd 就必须多跳一次，然后 currentEnd 更新为 farthest。
 //
 // 时间复杂度 O(n)，空间复杂度 O(1)。
+//
+// 前提：题目（LeetCode 45）保证一定可以到达终点。
+//   如果输入本身不可达，这个函数不会报错，但返回值没有意义
+//   —— 需要判断可达性时请先用 canJump() 检查。
 // ------------------------------------------------------------
 int jumpTimes(const vector<int>& jumps) {
     int jumpsUsed = 0;
@@ -277,6 +281,8 @@ int main() {
     cout << "最少跳跃次数：[2, 3, 1, 1, 4] -> " << jumpTimes({2, 3, 1, 1, 4})
          << " 次" << endl;
     assert(jumpTimes({2, 3, 1, 1, 4}) == 2);
+    // 不可达的输入（如 [0, 1]）返回值无意义，用 canJump 先判断
+    assert(canJump({0, 1}) == false);
 
     // 示例 5：买卖股票
     cout << "买卖股票：[7, 1, 5, 3, 6, 4] -> 最大利润 "

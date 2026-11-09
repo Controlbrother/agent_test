@@ -16,6 +16,7 @@
 # 只需要在修改了 md 内容后重新生成 PDF 时才用到这个脚本。
 # ============================================================
 
+import re
 import sys
 
 try:
@@ -67,6 +68,20 @@ STYLE = """
 """
 
 
+# PDF 里的相对链接会变成 file:///src/... 这种打不开的地址，
+# 所以导出前把 ../ 开头的相对路径换成 GitHub 上的绝对地址。
+REPO_URL = "https://github.com/Controlbrother/agent_test/blob/main"
+
+
+def absolutize_links(html: str) -> str:
+    def replace_relative(match: "re.Match[str]") -> str:
+        target = match.group(2)
+        target = target[3:] if target.startswith("../") else target
+        return f'{match.group(1)}="{REPO_URL}/{target}"'
+
+    return re.sub(r'(href)="(\.\./[^"]+|src/[^"]+)"', replace_relative, html)
+
+
 def main() -> None:
     if len(sys.argv) != 3:
         sys.exit("用法: python3 scripts/md_to_html.py <输入.md> <输出.html>")
@@ -79,6 +94,7 @@ def main() -> None:
         text,
         extensions=["tables", "fenced_code", "toc", "sane_lists"],
     )
+    html_body = absolutize_links(html_body)
 
     html = (
         "<!DOCTYPE html>\n"

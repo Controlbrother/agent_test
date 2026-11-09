@@ -48,6 +48,9 @@ using std::vector;
 //   最后栈必须为空，否则说明有左括号没被匹配。
 //
 // 时间复杂度 O(n)，空间复杂度 O(n)。
+//
+// 前提：按 LeetCode 20 的约定，输入里只有 ()[]{} 六种括号字符，
+//   其它字符会被当成"右括号"处理，所以不要传入别的字符。
 // ------------------------------------------------------------
 bool isValidParentheses(const string& text) {
     stack<char> brackets;
@@ -273,6 +276,8 @@ int main() {
     assert(isValidParentheses("([)]") == false);
     assert(isValidParentheses("(") == false);
     assert(isValidParentheses("") == true);
+    // 说明：题目只保证输入是括号字符，所以下面这种含字母的输入不在保证范围内
+    // assert(isValidParentheses("(x") == true);  // 不要这样用
     cout << "有效括号：\"()[]{}\" -> 合法，(] -> 不合法，([)] -> 不合法" << endl;
 
     // 示例 2：最小栈

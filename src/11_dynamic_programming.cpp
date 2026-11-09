@@ -68,8 +68,11 @@ long long climbStairs(int n) {
 // 答案：所有 dp[i] 里的最大值。
 //
 // 时间复杂度 O(n)，空间复杂度 O(1)。
+// 边界：空数组返回 0（和 robHouses、lengthOfLIS 等函数保持一致）。
 // ------------------------------------------------------------
 int maxSubArraySum(const vector<int>& numbers) {
+    if (numbers.empty()) return 0;
+
     int best = numbers[0];
     int current = numbers[0];  // dp[i]
     for (int i = 1; i < (int)numbers.size(); ++i) {
@@ -333,6 +336,13 @@ int main() {
     int maxSum = maxSubArraySum(numbers);
     cout << "最大子数组和：[-2, 1, -3, 4, -1, 2, 1, -5, 4] -> " << maxSum << endl;
     assert(maxSum == 6);  // [4, -1, 2, 1]
+
+    // 边界：空数组不能崩（各 DP 函数对空输入的处理要一致）
+    assert(maxSubArraySum({}) == 0);
+    assert(robHouses({}) == 0);
+    assert(lengthOfLIS({}) == 0);
+    assert(longestPalindrome("") == "");
+    assert(minPathSum({}) == 0);
 
     // 示例 3：打家劫舍
     cout << "打家劫舍：[2, 7, 9, 3, 1] -> " << robHouses({2, 7, 9, 3, 1}) << endl;

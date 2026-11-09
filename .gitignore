@@ -18,3 +18,6 @@ out.txt
 
 # 构建产物目录（scripts/build_all.sh 生成）
 build/
+
+# 由 scripts/md_to_html.py 生成的中间文件（只在导 PDF 时临时用）
+docs/*.html
