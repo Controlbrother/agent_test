@@ -225,6 +225,47 @@ long long largestRectangleArea(const vector<int>& heights) {
     return best;
 }
 
+// ------------------------------------------------------------
+// 题目 7：用两个栈实现队列（LeetCode 232）
+//
+// 思路：
+//   - inStack 只管入队，直接压栈；
+//   - outStack 只管出队，为空时把 inStack 里的元素全部倒过来。
+//   每个元素最多被"倒"一次，所以均摊时间复杂度 O(1)。
+//
+// 时间复杂度：push O(1)，pop / peek 均摊 O(1)；空间复杂度 O(n)。
+// ------------------------------------------------------------
+class QueueWithTwoStacks {
+public:
+    void push(int value) { inStack.push(value); }
+
+    int pop() {
+        moveInToOut();
+        int value = outStack.top();
+        outStack.pop();
+        return value;
+    }
+
+    int front() {
+        moveInToOut();
+        return outStack.top();
+    }
+
+    bool empty() const { return inStack.empty() && outStack.empty(); }
+
+private:
+    void moveInToOut() {
+        if (!outStack.empty()) return;  // 出栈里还有，直接复用
+        while (!inStack.empty()) {
+            outStack.push(inStack.top());
+            inStack.pop();
+        }
+    }
+
+    stack<int> inStack;   // 负责入队
+    stack<int> outStack;  // 负责出队
+};
+
 int main() {
     // 示例 1：有效括号
     assert(isValidParentheses("()[]{}") == true);
@@ -276,6 +317,20 @@ int main() {
     }
     cout << "]" << endl;
     assert((windowAnswer == vector<int>{3, 3, 5, 5, 6, 7}));
+
+    // 示例 7：两个栈实现队列
+    QueueWithTwoStacks queue;
+    queue.push(1);
+    queue.push(2);
+    int firstOut = queue.front();
+    int secondOut = queue.pop();
+    cout << "两个栈实现队列：push(1) push(2) 后 front = " << firstOut
+         << "，pop = " << secondOut << "，空队列 = "
+         << (queue.empty() ? "是" : "否") << endl;
+    assert(firstOut == 1);
+    assert(secondOut == 1);
+    queue.pop();  // 把剩下的 2 也弹掉
+    assert(queue.empty() == true);
 
     // 示例 6：柱状图最大矩形
     long long area = largestRectangleArea({2, 1, 5, 6, 2, 3});

@@ -1,6 +1,22 @@
-# 常用工具：DSU / 线段树 / 树状数组 / Dijkstra / 并查集等骨架
-# 说明：这里只放模板骨架，做题时按需复制到 solution.cpp 里，不要直接 include
-# （大多数评测机只编译单个文件）。
+# 常用工具：DSU / 线段树 / 树状数组 / Dijkstra / 并查集等骨架（机试速查）
+
+> **定位**：这里是**竞赛/机试风格的速查骨架**，命名短、注释少，适合考试时直接复制。
+> 如果你在学算法、准备面试手写，请先看 `src/` 里对应的**简单语法 + 完整中文注释**版本
+> （每个文件都能独立编译运行，带示例和自检）：
+>
+> | 本文骨架 | 推荐阅读的练习代码 |
+> |---|---|
+> | 并查集 | [`../src/09_graph.cpp`](../src/09_graph.cpp) 里的 `DisjointSet` |
+> | 树状数组 | [`../src/18_advanced_structures.cpp`](../src/18_advanced_structures.cpp) 里的 `FenwickTree` |
+> | 线段树（区间加 / 区间和） | [`../src/18_advanced_structures.cpp`](../src/18_advanced_structures.cpp) 里的 `SegmentTree` |
+> | Dijkstra | [`../src/09_graph.cpp`](../src/09_graph.cpp) 里的 `dijkstra` |
+> | 单调栈 | [`../src/06_stack_queue.cpp`](../src/06_stack_queue.cpp) |
+> | 离散化 | [`../src/18_advanced_structures.cpp`](../src/18_advanced_structures.cpp) 里的 `discretize` |
+> | 二分法（整数 / 答案 / 实数 / 三分 / 旋转数组） | [`../src/03_binary_search.cpp`](../src/03_binary_search.cpp) |
+> | 组合数预处理 | [`../src/19_math.cpp`](../src/19_math.cpp) 里的 `Combination` |
+>
+> 说明：这里只放模板骨架，做题时按需复制到 solution.cpp 里，不要直接 include
+> （大多数评测机只编译单个文件）。
 
 ## 并查集（带路径压缩 + 按秩合并）
 ```cpp

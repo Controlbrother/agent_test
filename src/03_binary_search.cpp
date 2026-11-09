@@ -222,6 +222,33 @@ void stlBinarySearchDemo() {
     assert(exists);
 }
 
+// ------------------------------------------------------------
+// 7. 三分查找：求单峰函数的最小值
+//
+// 思路：
+//   函数先下降后上升（单峰）时，每次取两个三等分点 m1、m2：
+//   - f(m1) < f(m2)：最小值一定在 [left, m2]；
+//   - 否则最小值一定在 [m1, right]。
+//   每次砍掉三分之一，收敛略慢于二分，但能处理"非单调但单峰"的函数。
+//
+// 时间复杂度 O(log 区间长度)，空间复杂度 O(1)。
+// 这里用 f(x) = (x - 3)^2 演示，最小值在 x = 3 处。
+// ------------------------------------------------------------
+double parabola(double x) { return (x - 3.0) * (x - 3.0); }
+
+double ternarySearchMinimum(double left, double right) {
+    for (int i = 0; i < 200; ++i) {  // 固定迭代次数，保证一定收敛
+        double m1 = left + (right - left) / 3;
+        double m2 = right - (right - left) / 3;
+        if (parabola(m1) < parabola(m2)) {
+            right = m2;   // 最小值在 [left, m2]
+        } else {
+            left = m1;    // 最小值在 [m1, right]
+        }
+    }
+    return (left + right) / 2;
+}
+
 int main() {
     vector<int> sortedNumbers = {1, 2, 2, 2, 3, 5, 8};
 
@@ -259,7 +286,12 @@ int main() {
     cout << "实数二分 sqrt(2) = " << root << endl;
     assert(std::fabs(root - std::sqrt(2.0)) < 1e-9);
 
-    // 示例 6：STL
+    // 示例 6：三分查找
+    double minimumPoint = ternarySearchMinimum(-10.0, 10.0);
+    cout << "三分查找 (x-3)^2 的最小值点 x = " << minimumPoint << endl;
+    assert(std::fabs(minimumPoint - 3.0) < 1e-6);
+
+    // 示例 7：STL
     stlBinarySearchDemo();
 
     cout << "03 二分查找：全部示例通过" << endl;
