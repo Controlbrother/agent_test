@@ -1,6 +1,37 @@
-# C++ 面试刷题模板（按类别背题）
+# C++ 面试刷题知识库（按类别背题）
 
 > 用法：**不要从第一页背到最后一页**。按下面「三轮法」走，每类只精刷 3–5 题，题量比题解重要。
+>
+> 本文档是「知识库」：讲原理、给模板、列必刷题和易错点。
+> 每个专题都有对应的**可编译可运行**的简单版代码，放在仓库的 `src/` 目录里（见下表），
+> 建议「先读本文的做法，再看 `src/` 的代码，最后合上资料自己手打一遍」。
+
+## 本文档与 `src/` 练习代码的对应关系
+
+| 本文档章节 | 对应练习代码 | 说明 |
+|---|---|---|
+| 一、数组 / 双指针 / 滑动窗口 | [`src/01_two_pointers.cpp`](../src/01_two_pointers.cpp)、[`src/02_sliding_window.cpp`](../src/02_sliding_window.cpp) | 对撞双指针、最长/最短型窗口 |
+| 二、二分查找 | [`src/03_binary_search.cpp`](../src/03_binary_search.cpp) | 整数二分、二分答案、实数二分、三分 |
+| 三、哈希表 | [`src/04_hash_table.cpp`](../src/04_hash_table.cpp) | 两数之和、分组、前缀和 + 哈希 |
+| 四、链表 | [`src/05_linked_list.cpp`](../src/05_linked_list.cpp) | 哑节点、快慢指针、就地反转 |
+| 五、栈 / 队列 / 单调栈 | [`src/06_stack_queue.cpp`](../src/06_stack_queue.cpp) | 单调栈、单调队列、双栈队列 |
+| 六、二叉树 | [`src/07_binary_tree.cpp`](../src/07_binary_tree.cpp) | 三种遍历、层序、BST、LCA、建树 |
+| 七、回溯 / DFS | [`src/08_backtracking.cpp`](../src/08_backtracking.cpp) | 子集 / 组合 / 排列 / N 皇后 |
+| 八、图 | [`src/09_graph.cpp`](../src/09_graph.cpp) | BFS / DFS / 拓扑 / 并查集 / Dijkstra |
+| 九、堆 / 优先队列 | [`src/10_heap.cpp`](../src/10_heap.cpp) | 第 K 大、前 K 高频、双堆中位数 |
+| 十、动态规划 | [`src/11_dynamic_programming.cpp`](../src/11_dynamic_programming.cpp) | 线性 / 背包 / 区间 / 双串 DP |
+| 十一、贪心 | [`src/12_greedy.cpp`](../src/12_greedy.cpp) | 区间调度、跳跃游戏、加油站 |
+| 十二、字符串 | [`src/13_string_kmp.cpp`](../src/13_string_kmp.cpp) | KMP、公共前缀、大数相加 |
+| 十三、位运算 | [`src/14_bit_operations.cpp`](../src/14_bit_operations.cpp) | lowbit、异或、比特位计数 |
+| 十四、排序 | [`src/15_sorting.cpp`](../src/15_sorting.cpp) | 快排、归并、快速选择、自定义排序 |
+| 十五、前缀和 / 差分 | [`src/16_prefix_diff.cpp`](../src/16_prefix_diff.cpp) | 一维 / 二维前缀和、差分 |
+| 十六、设计题 | [`src/17_design.cpp`](../src/17_design.cpp) | LRU、Trie、O(1) 随机集合 |
+| （补充）进阶结构 | [`src/18_advanced_structures.cpp`](../src/18_advanced_structures.cpp) | 树状数组、线段树、离散化 |
+| （补充）数学基础 | [`src/19_math.cpp`](../src/19_math.cpp) | 快速幂、gcd、组合数、质数筛 |
+| （补充）读入输出基本功 | [`src/00_basics.cpp`](../src/00_basics.cpp) | cin / cout、long long、防溢出 |
+
+> 本文档里的代码模板是「速记版」，注释比 `src/` 里少，命名也更短；
+> 想看清完整注释和运行结果，请直接看 `src/` 里对应的文件。
 
 ---
 
@@ -107,8 +138,8 @@ int twoSum(vector<int>& a, int target) {
 ```cpp
 // 在 [lo, hi) 里找第一个使 pred 为 true 的位置。
 // pred 必须单调（false...false true...true）。
-template <class F>
-long long lowerBound(long long lo, long long hi, F pred) {
+template <class Predicate>
+long long lowerBound(long long lo, long long hi, Predicate pred) {
     while (lo < hi) {
         long long mid = lo + (hi - lo) / 2;   // 不写 (lo+hi)/2，防溢出
         if (pred(mid)) hi = mid;
@@ -402,9 +433,9 @@ vector<vector<int>> levelOrder(TreeNode* root) {
     queue<TreeNode*> q;
     q.push(root);
     while (!q.empty()) {
-        int sz = q.size();          // 关键：先记下这一层的节点数
+        int levelSize = q.size();   // 关键：先记下这一层的节点数
         vector<int> level;
-        for (int i = 0; i < sz; ++i) {
+        for (int i = 0; i < levelSize; ++i) {
             TreeNode* node = q.front(); q.pop();
             level.push_back(node->val);
             if (node->left) q.push(node->left);
@@ -594,16 +625,25 @@ struct DSU {
 ### 模板：Dijkstra（邻接表 + 优先队列）
 
 ```cpp
-vector<long long> dijkstra(int n, vector<vector<pair<int,int>>>& g, int src) {
-    const long long INF = LLONG_MAX / 4;
+// g[u] 里存的是 (邻接点, 边权)
+vector<long long> dijkstra(int n, const vector<vector<pair<int,int>>>& g, int src) {
+    const long long INF = 1000000000000000000LL;   // 10^18，当作无穷大
     vector<long long> dist(n, INF);
-    priority_queue<pair<long long,int>, vector<pair<long long,int>>, greater<>> pq;
+
+    // 小顶堆：堆顶是当前距离最小的点
+    using State = pair<long long, int>;            // (距离, 点)
+    priority_queue<State, vector<State>, greater<State>> pq;
+
     dist[src] = 0;
     pq.push({0, src});
     while (!pq.empty()) {
-        auto [d, u] = pq.top(); pq.pop();
-        if (d > dist[u]) continue;          // 过期条目，跳过
-        for (auto [v, w] : g[u]) {
+        long long d = pq.top().first;              // 当前距离
+        int u = pq.top().second;                   // 当前点
+        pq.pop();
+        if (d > dist[u]) continue;                 // 过期条目，跳过
+        for (const pair<int,int>& edge : g[u]) {
+            int v = edge.first;                    // 邻接点
+            int w = edge.second;                   // 边权
             if (dist[u] + w < dist[v]) {
                 dist[v] = dist[u] + w;
                 pq.push({dist[v], v});
