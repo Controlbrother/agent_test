@@ -62,3 +62,24 @@ flush();
 - 空输入、前后空白、制表符混排均正常
 - `snippets.md` 内全部骨架抽出来编译并跑断言，二分（整数/答案/实数/旋转数组）、DSU / BIT / 线段树（区间加区间和）/ Dijkstra / 单调栈 / 离散化 / 组合数全部通过
 - 二分部分额外做了溢出与边界回归：`lowerBoundLL` 与 STL `lower_bound`/`upper_bound` 在 `0..10` 全取值逐一比对一致；`lo=0, hi=4e9` 不溢出；旋转数组含单元素、已排序、断点在首尾等形态
+
+## pnpm 安装说明
+
+[pnpm](https://pnpm.io/) 是基于内容寻址存储的 Node.js 包管理器。本仓库目前没有 `package.json`，无需安装依赖；若后续引入 Node.js 项目，可按以下步骤安装 pnpm。
+
+推荐通过 Node.js 自带的 Corepack 启用（需要 Node.js 16.13 及以上版本）：
+
+```bash
+corepack enable
+corepack prepare pnpm@latest --activate
+pnpm -v
+```
+
+也可以用 npm 全局安装：
+
+```bash
+npm install -g pnpm
+pnpm -v
+```
+
+安装完成后，在含 `package.json` 的项目目录中执行 `pnpm install` 即可安装依赖。
